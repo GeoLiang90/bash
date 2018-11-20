@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <errno.h>
 char ** parse_args(char *line){
   char ** arr = calloc(sizeof(char*), 5);
   int i = 0;
@@ -23,8 +23,15 @@ void start(){
     //char bin[50] = "/bin/";
     //char * path = strcat(bin, commands[0]);
     //printf("%s \n", path);
+    if (strcmp(line[0],"cd") == 0){
+	int z = chdir(line[1]);
+	if (z < 0){
+	  perror("ERROR");
+       }
+    }
     int next = fork();
     if(! next){
+      for(int i = 0
       execvp(line[0], line);
     }
   }
