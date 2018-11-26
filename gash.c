@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <ctype.h>
+#include <sys/wait.h>
 
 char ** parse_args(char *line){
   char ** arr = calloc(sizeof(char*), 5);
@@ -11,6 +12,7 @@ char ** parse_args(char *line){
   int i = 0;
   while (line) {
     temp = strsep(&line, " ");
+    
     if(strstr(" ", temp)){
       temp = strsep(&temp, " ");
     }
@@ -37,7 +39,11 @@ void cd(char * dir){
 
 void start(){
   while(1){
-    //printf("%s: ", getcwd());
+    //NOTE: This puts the working directory into w_dir
+    char * w_dir = malloc(100);
+    //NOTE: The ~ directory is skipped. It is short for home which is already present
+    printf("%s:$ ", getcwd(w_dir,100));
+
     char * input = malloc(100);
     fgets(input,100,stdin);
     input[strlen(input)-1] = 0;
@@ -50,6 +56,11 @@ void start(){
 	     cd(line[1]);
      }
     int next = fork();
+    //NOTE: This wait here should fix the problem with ls not working properly
+    int status;
+    //Status just allows me to give wait an argument
+    wait(&status);
+
     if(! next){
       execvp(line[0], line);
     }
