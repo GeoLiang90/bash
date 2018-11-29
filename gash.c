@@ -12,7 +12,7 @@ char ** parse_args(char *line){
   int i = 0;
   while (line) {
     temp = strsep(&line, " ");
-    
+
     if(strstr(" ", temp)){
       temp = strsep(&temp, " ");
     }
@@ -24,10 +24,18 @@ char ** parse_args(char *line){
   return arr;
 }
 
-char ** parse_arr(char * line){
-  char ** arr = calloc(sizeof(char*), 5);
-
-}
+// char ** parse_multi(char * line){
+//   char ** arr = calloc(sizeof(char*), 10);
+//   char * temp;
+//   int i = 0;
+//   while(line){
+//     temp = strsep(&line, ";");
+//     if(temp)
+//       arr[i] = temp;
+//     i++;
+//   }
+//   return arr;
+//}
 
 void cd(char * dir){
   //printf("%s \n", dir);
@@ -47,22 +55,49 @@ void start(){
     char * input = malloc(100);
     fgets(input,100,stdin);
     input[strlen(input)-1] = 0;
-    char ** line = parse_args(input);
-    //printf("%s \n", commands[0]);
-    //char bin[50] = "/bin/";
-    //char * path = strcat(bin, commands[0]);
-    //printf("%s \n", path);
-    if (strcmp(line[0],"cd") == 0){
-	     cd(line[1]);
-     }
-    int next = fork();
-    //NOTE: This wait here should fix the problem with ls not working properly
-    int status;
-    //Status just allows me to give wait an argument
-    wait(&status);
 
-    if(! next){
-      execvp(line[0], line);
+    int multi = 1;
+    char ** arr = calloc(sizeof(char*), 10);
+    if(strstr(input,";")){
+      //printf("has ; \n");
+      char * temp;
+      int i = 0;
+      while(input){
+        temp = strsep(&input, ";");
+        if(temp)
+            arr[i] = temp;
+        i++;
+        multi += 1;
+        //printf("%s \n", temp);
+      }
+    }
+    int x = 0;
+    while(multi){
+      //printf("%d \n", multi);
+      char ** line = calloc(sizeof(char*), 10);
+      if(multi > 1){
+        line = parse_args(arr[x]);
+        x += 1;
+      }
+      else
+        line = parse_args(input);
+      //printf("%s \n", commands[0]);
+      //char bin[50] = "/bin/";
+      //char * path = strcat(bin, commands[0]);
+      //printf("%s \n", path);
+      if (strcmp(line[0],"cd") == 0){
+  	     cd(line[1]);
+       }
+
+      int next = fork();
+      //NOTE: This wait here should fix the problem with ls not working properly
+      int status;
+      //Status just allows me to give wait an argument
+      wait(&status);
+      if(! next)
+        execvp(line[0], line);
+
+      multi -= 1;
     }
   }
 }
