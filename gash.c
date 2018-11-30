@@ -62,22 +62,25 @@ void start(){
       //printf("has ; \n");
       char * temp;
       int i = 0;
+      multi = 0;
       while(input){
         temp = strsep(&input, ";");
-        if(temp)
+        if(temp){
             arr[i] = temp;
+            multi += 1;
+        }
         i++;
-        multi += 1;
-        //printf("%s \n", temp);
+        //printf("%d \n", multi);
       }
     }
     int x = 0;
     while(multi){
-      //printf("%d \n", multi);
+      // printf("%d \n", multi);
       char ** line = calloc(sizeof(char*), 10);
       if(multi > 1){
         line = parse_args(arr[x]);
         x += 1;
+        input = arr[x];
       }
       else
         line = parse_args(input);
