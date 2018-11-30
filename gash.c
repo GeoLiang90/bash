@@ -5,8 +5,9 @@
 #include <errno.h>
 #include <ctype.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
-char ** parse_args(char *line){
+char ** parse_args(char * line){
   char ** arr = calloc(sizeof(char*), 5);
   char * temp;
   int i = 0;
@@ -24,25 +25,17 @@ char ** parse_args(char *line){
   return arr;
 }
 
-// char ** parse_multi(char * line){
-//   char ** arr = calloc(sizeof(char*), 10);
-//   char * temp;
-//   int i = 0;
-//   while(line){
-//     temp = strsep(&line, ";");
-//     if(temp)
-//       arr[i] = temp;
-//     i++;
-//   }
-//   return arr;
-//}
-
 void cd(char * dir){
   //printf("%s \n", dir);
   int z = chdir(dir);
   if (z < 0){
     perror("ERROR");
    }
+}
+
+void redirect(char * file){
+  int fd = open(file, O_WRONLY, 777);
+  dup2(fd, STDOUT_FILENO);
 }
 
 void start(){
@@ -56,7 +49,7 @@ void start(){
     fgets(input,100,stdin);
     input[strlen(input)-1] = 0;
 
-    int multi = 1;
+    int multi = 1; // Number of commands
     char ** arr = calloc(sizeof(char*), 10);
     if(strstr(input,";")){
       //printf("has ; \n");
@@ -73,6 +66,16 @@ void start(){
         //printf("%d \n", multi);
       }
     }
+
+    if(strstr(input,">")){ //|| strstr(input,"<")){
+      char * temp;
+      char * og = strsep(&input,">");
+      temp = strsep(&input,">");
+      printf("%s \n", temp);
+      redirect(temp);
+      input = og;
+    }
+
     int x = 0;
     while(multi){
       // printf("%d \n", multi);
@@ -90,7 +93,11 @@ void start(){
       //printf("%s \n", path);
       if (strcmp(line[0],"cd") == 0){
   	     cd(line[1]);
-       }
+      }
+
+      if (strcmp(line[0],"exit") == 0){
+  	     exit(0);
+      }
 
       int next = fork();
       //NOTE: This wait here should fix the problem with ls not working properly
