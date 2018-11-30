@@ -7,7 +7,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
-char ** parse_args(char * line){
+char ** parse_args(char *line){
   char ** arr = calloc(sizeof(char*), 5);
   char * temp;
   int i = 0;
@@ -38,6 +38,7 @@ void redirect(char * file){
   dup2(fd, STDOUT_FILENO);
 }
 
+
 void start(){
   while(1){
     //NOTE: This puts the working directory into w_dir
@@ -49,7 +50,7 @@ void start(){
     fgets(input,100,stdin);
     input[strlen(input)-1] = 0;
 
-    int multi = 1; // Number of commands
+    int multi = 1;
     char ** arr = calloc(sizeof(char*), 10);
     if(strstr(input,";")){
       //printf("has ; \n");
@@ -67,14 +68,14 @@ void start(){
       }
     }
 
-    if(strstr(input,">")){ //|| strstr(input,"<")){
-      char * temp;
-      char * og = strsep(&input,">");
-      temp = strsep(&input,">");
-      printf("%s \n", temp);
-      redirect(temp);
-      input = og;
-    }
+    // if(strstr(input,">")){ //|| strstr(input,"<")){
+    //   char * temp;
+    //   char * og = strsep(&input,">");
+    //   temp = strsep(&input,">");
+    //   printf("%s \n", temp);
+    //   redirect(temp);
+    //   input = og;
+    // }
 
     int x = 0;
     while(multi){
@@ -93,9 +94,9 @@ void start(){
       //printf("%s \n", path);
       if (strcmp(line[0],"cd") == 0){
   	     cd(line[1]);
-      }
+       }
 
-      if (strcmp(line[0],"exit") == 0){
+       if (strcmp(line[0],"exit") == 0){
   	     exit(0);
       }
 
