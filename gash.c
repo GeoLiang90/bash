@@ -57,7 +57,7 @@ void redirect_output(char ** in, char *** ln, int * fd){
   }
 }
 
-int redirect_input(char **in, char *** ln, int * fd){
+void redirect_input(char **in, char *** ln, int * fd){
   char* holder;
   char ** file;
 
@@ -75,6 +75,43 @@ int redirect_input(char **in, char *** ln, int * fd){
 
 }
 
+int redirect_compound(char **in, char ***ln, int * fdW, int * fdR){
+  //Compound assumes that you want to run command < file then put that into a file
+
+  char * holder;
+  //UP just means unprocessed
+  char ** wFile;
+  char ** rFile;
+
+  //Take care of the command
+  holder = strsep(in, "<");
+  *ln = parse_args(holder);
+
+  rFile = parse_args(strsep(in, ">"));
+  //rFile = parse_args(rFileUP)
+  wFile = parse_args(*in);
+  /*
+  printf("%s \n", rFile[0]);
+  printf("%s \n", wFile[0]);
+  */
+  *fdW = open(wFile[0], O_CREAT | O_WRONLY, 0666);
+  *fdR = open(rFile[0], O_RDONLY);
+  if (*fdW < 0){
+    perror("ERROR");
+  }
+  if (*fdR < 0){
+    perror("ERROR");
+  }
+
+  /*
+  files[0] = parse_args(strsep(in, ">"));
+  files[1] = parse_args(*in);
+  int i = 0;
+  while(files[i]){
+    printf("%s\n", files[i]);
+  }
+  */
+}
 
 void start(){
   while(1){
@@ -122,8 +159,8 @@ void start(){
     while(multi){
       //printf("%d \n", multi);
       char ** line = calloc(sizeof(char*), 10);
-      int toWrite;
-      int toRead;
+      int toWrite = 0;
+      int toRead = 0;
       //If there is more than one command
       if(multi > 1){
         //Parse multiple times each argument in arr to put into input
@@ -135,8 +172,12 @@ void start(){
         //Check for a redirect
         char * r_out = strstr(input,">");
         char * r_in = strstr(input,"<");
-
-        if(r_out){
+        if (r_out && r_in){
+          //In the special case that both are there
+          //printf("Running compound \n");
+          redirect_compound(&input,&line,&toWrite,&toRead);
+        }
+        else if(r_out){
           redirect_output(&input,&line,&toWrite);
         }
 
@@ -197,7 +238,7 @@ void start(){
           }
           */
         }
-
+    
         if(toWrite){
           int clW;
           clW = close(toWrite);
