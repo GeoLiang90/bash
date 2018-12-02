@@ -40,7 +40,7 @@ void cd(char * dir){
 }
 
 void redirect(char * file){
-  int fd = open(file, O_WRONLY, 777);
+  int fd = open(file, O_WRONLY, 0777);
   //dup2(fd, STDOUT_FILENO);
 }
 
@@ -112,7 +112,7 @@ void start(){
           //printf("%s\n", input);
           toWrite = open(input, O_CREAT | O_WRONLY, 777);
           lseek(toWrite,0,SEEK_SET);
-          dup2(toWrite,STDOUT_FILENO);
+          //dup2(toWrite,STDOUT_FILENO);
           //toRead = open("stdout.txt",O_RDONLY);
         }
         /*
@@ -133,7 +133,8 @@ void start(){
          break;
        }
 
-       if (strcmp(line[0],"exit") == 0){
+       if (strcmp(line[0],"exit")
+        == 0){
   	     exit(0);
          break;
       }
@@ -146,8 +147,11 @@ void start(){
 
       if(! next){
         //Getting caught up here
-        //close(toWrite);
+        if(toWrite){
+          dup2(toWrite,STDOUT_FILENO);
+        }
         execvp(line[0], line);
+        close(toWrite);
         /*
         if(toWrite){
           printf("Works");
