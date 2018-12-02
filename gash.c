@@ -40,9 +40,18 @@ void cd(char * dir){
    }
 }
 
-void redirect_output(char * input){
+void redirect_output(char ** in, char *** ln, int * fd){
+  //User typed line, Array to hold parsed command, File descriptor to output to
   char * holder;
-  //int fd = open(file, O_WRONLY, 0777);
+  char ** file;
+  //I want the first occurence to be executed
+  holder = strsep(in, ">");
+  //printf("%s\n",holder);
+  *ln = parse_args(holder);
+  file = parse_args(*in);
+  //printf("%s\n", input);
+  //printf("%s\n",file[0]);
+  *fd = open(file[0], O_CREAT | O_WRONLY, 0666);
 }
 
 void redirect_input(){
@@ -105,10 +114,10 @@ void start(){
       }
       else{
         //Check for a redirect
-
-        char ** file;
-        char * r_in = strstr(input,">");
-        if(r_in){
+        char * r_out = strstr(input,">");
+        if(r_out){
+          redirect_output(&input,&line,&toWrite);
+          /*
           char * holder;
           char ** file;
           //I want the first occurence to be executed
@@ -119,12 +128,20 @@ void start(){
           //printf("%s\n", input);
           //printf("%s\n",file[0]);
           toWrite = open(file[0], O_CREAT | O_WRONLY, 0666);
-        //  lseek(toWrite,0,SEEK_SET);
-          //dup2(toWrite,STDOUT_FILENO);
-          //toRead = open("stdout.txt",O_RDONLY);
+          */
         }
         /*
-        if(strstr(input, "<")){
+        char * r_in = strstr(input,"<");
+        if(r_in){
+
+          char* holder;
+          char ** file;
+          holder = strsep(&input, "<");
+          file = parse_args(input);
+          toRead = open(file[0], O_RDONLY);
+          if (toRead < 0){
+            perror("ERROR");
+          }
 
         }
         */
