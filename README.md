@@ -22,6 +22,7 @@ by Angela Li and George Liang
 
 ## Files & Function Headers:
   gash.c
+  
     char ** parse_args()
       Inputs: char * line
       Returns: Array of strings where each entry is a token
