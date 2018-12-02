@@ -161,17 +161,39 @@ void start(){
       char ** line = calloc(sizeof(char*), 10);
       int toWrite = 0;
       int toRead = 0;
+      char * r_out;
+      char * r_in;
       //If there is more than one command
       if(multi > 1){
         //Parse multiple times each argument in arr to put into input
-        line = parse_args(arr[x]);
+        //Check for redirect in arr[x]
+        r_out = strstr(arr[x],">");
+        r_in = strstr(arr[x],"<");
+
+        if (r_out && r_in){
+          //In the special case that both are there
+          //printf("Running compound \n");
+          redirect_compound(&arr[x],&line,&toWrite,&toRead);
+        }
+        else if(r_out){
+          redirect_output(&arr[x],&line,&toWrite);
+        }
+
+        else if(r_in){
+          redirect_input(&arr[x],&line,&toRead);
+        }
+
+        else{
+          line = parse_args(arr[x]);
+        }
         x += 1;
         input = arr[x];
+
       }
       else{
         //Check for a redirect
-        char * r_out = strstr(input,">");
-        char * r_in = strstr(input,"<");
+        r_out = strstr(input,">");
+        r_in = strstr(input,"<");
         if (r_out && r_in){
           //In the special case that both are there
           //printf("Running compound \n");
