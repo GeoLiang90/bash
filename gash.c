@@ -52,9 +52,26 @@ void redirect_output(char ** in, char *** ln, int * fd){
   //printf("%s\n", input);
   //printf("%s\n",file[0]);
   *fd = open(file[0], O_CREAT | O_WRONLY, 0666);
+  if (*fd < 0){
+    perror("ERROR");
+  }
 }
 
-void redirect_input(){
+int redirect_input(char **in, char *** ln, int * fd){
+  char* holder;
+  char ** file;
+
+  holder = strsep(in, "<");
+
+  *ln = parse_args(holder);
+
+  file = parse_args(*in);
+
+  *fd = open(file[0], O_RDONLY);
+
+  if (*fd < 0){
+    perror("ERROR");
+  }
 
 }
 
@@ -67,7 +84,9 @@ void start(){
     printf("%s:$ ", getcwd(w_dir,100));
 
     char * input = malloc(100);
+
     fgets(input,100,stdin);
+
     input[strlen(input)-1] = 0;
 
     int multi = 1;
@@ -115,39 +134,20 @@ void start(){
       else{
         //Check for a redirect
         char * r_out = strstr(input,">");
+        char * r_in = strstr(input,"<");
+
         if(r_out){
           redirect_output(&input,&line,&toWrite);
-          /*
-          char * holder;
-          char ** file;
-          //I want the first occurence to be executed
-          holder = strsep(&input, ">");
-          //printf("%s\n",holder);
-          line = parse_args(holder);
-          file = parse_args(input);
-          //printf("%s\n", input);
-          //printf("%s\n",file[0]);
-          toWrite = open(file[0], O_CREAT | O_WRONLY, 0666);
-          */
         }
-        /*
-        char * r_in = strstr(input,"<");
-        if(r_in){
 
-          char* holder;
-          char ** file;
-          holder = strsep(&input, "<");
-          file = parse_args(input);
-          toRead = open(file[0], O_RDONLY);
-          if (toRead < 0){
-            perror("ERROR");
-          }
-
+        else if(r_in){
+          redirect_input(&input,&line,&toRead);
         }
-        */
+
         else{
           line = parse_args(input);
         }
+
       }
       //printf("%s \n", commands[0]);
       //char bin[50] = "/bin/";
@@ -175,10 +175,13 @@ void start(){
         if(toWrite){
           dup2(toWrite,STDOUT_FILENO);
         }
-        execvp(line[0], line);
-        if (toWrite){
-          close(toWrite);
+
+        if (toRead){
+          dup2(toRead,STDIN_FILENO);
         }
+
+        execvp(line[0], line);
+
         /*
         if(toWrite){
           printf("Works");
@@ -194,9 +197,36 @@ void start(){
           }
           */
         }
-        if (toWrite){
-          close(toWrite);
+
+        if(toWrite){
+          int clW;
+          clW = close(toWrite);
+          toWrite = 0;
+          if (clW < 0){
+            perror("ERROR CLOSING toWrite");
+          }
+          /*
+          else{
+            printf("Successfully closed toWrite\n");
+            printf("toWrite: %d\n", toWrite);
+          }
+          */
         }
+        if(toRead){
+          int clR;
+          clR = close(toRead);
+          toRead = 0;
+          if (clR < 0){
+            perror("ERROR CLOSING toRead");
+          }
+          /*
+          else{
+            printf("Successfully closed toRead\n");
+          }
+          */
+        }
+
+
       multi -= 1;
     } //multi while loop ends here
   }
