@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #define READ 0
 #define WRITE 1
+
 char ** parse_args(char *line){
   char ** arr = calloc(sizeof(char*), 5);
   char * temp;
@@ -112,7 +113,17 @@ void redirect_compound(char **in, char ***ln, int * fdW, int * fdR){
   }
   */
 }
+void piper(char **in, char *** ln, char*** commandTwo, int ** pipeArray){
+  char * holder;
+  holder = strsep(in, "|");
+  //Gives it the first command
+  *ln = parse_args(holder);
+  //printf("First Command: %s\n ",*commandOne[0]);
+  *commandTwo = parse_args(*in);
+  //printf("Second Command: %s\n ",*commandTwo[0]);
 
+ pipe(*pipeArray);
+}
 void start(){
   while(1){
     //NOTE: This puts the working directory into w_dir
@@ -161,15 +172,19 @@ void start(){
       char ** line = calloc(sizeof(char*), 10);
       int toWrite = 0;
       int toRead = 0;
+      int * pipes = calloc(sizeof(int),2);
       char * r_out;
       char * r_in;
+      char * p_ipe;
+      char ** cmdTwo = calloc(sizeof(char*), 10);
+
       //If there is more than one command
       if(multi > 1){
         //Parse multiple times each argument in arr to put into input
         //Check for redirect in arr[x]
         r_out = strstr(arr[x],">");
         r_in = strstr(arr[x],"<");
-
+        //p_ipe = strstr(arr[x], "|");
         if (r_out && r_in){
           //In the special case that both are there
           //printf("Running compound \n");
@@ -188,13 +203,21 @@ void start(){
         }
         x += 1;
         input = arr[x];
-
       }
       else{
         //Check for a redirect
         r_out = strstr(input,">");
         r_in = strstr(input,"<");
-        if (r_out && r_in){
+        p_ipe = strstr(input,"|");
+        //printf("%s\n", p_ipe);
+
+        if(p_ipe){
+          //line = parse_args(input);
+          piper(&input,&line,&cmdTwo,&pipes);
+        }
+
+        else if (r_out && r_in){
+        //if(r_out && r_in){
           //In the special case that both are there
           //printf("Running compound \n");
           redirect_compound(&input,&line,&toWrite,&toRead);
@@ -206,16 +229,15 @@ void start(){
         else if(r_in){
           redirect_input(&input,&line,&toRead);
         }
-
         else{
           line = parse_args(input);
         }
-
       }
       //printf("%s \n", commands[0]);
       //char bin[50] = "/bin/";
       //char * path = strcat(bin, commands[0]);
       //printf("%s \n", path);
+
       if (strcmp(line[0],"cd") == 0){
   	     cd(line[1]);
 
@@ -233,8 +255,9 @@ void start(){
       //Status just allows me to give wait an argument
       wait(&status);
 
-      if(! next){
-        //Getting caught up here
+
+      if(!next){
+
         if(toWrite){
           dup2(toWrite,STDOUT_FILENO);
         }
@@ -242,8 +265,38 @@ void start(){
         if (toRead){
           dup2(toRead,STDIN_FILENO);
         }
-
+        /*
+        if (p_ipe){
+          printf(" I running");
+          //Everything from STDOUT should be written to this pipe
+          dup2(pipes[WRITE],STDOUT_FILENO);
+          //Everything from STDIN should be read from this pipe
+          //dup2(pipes[WRITE],STDIN_FILENO);
+          //ls would be run an outputted to pipes[WRITE]
+          execvp(cmdOne[0], cmdOne);
+          //wc will now check for STDIN and should be handed pipes[WRITE]
+          //execvp(cmdTwo[0], cmdTwo);
+        }
+        */
+        if (p_ipe){
+          int c1 = fork();
+          if (!c1){
+          dup2(pipes[WRITE],STDOUT_FILENO);
+          execvp(line[0],line);
+          }
+          //dup2(pipes[WRITE],STDIN_FILENO);
+        }
+        else{
         execvp(line[0], line);
+        }
+        if (p_ipe){
+          /*
+          char ** f = calloc(sizeof(char*),1);
+          f[0] = "/bin/stdout";
+          */
+          execvp(cmdTwo[0], f);
+        }
+        //}
 
         /*
         if(toWrite){
@@ -282,12 +335,20 @@ void start(){
           if (clR < 0){
             perror("ERROR CLOSING toRead");
           }
+        }
+
+        if(pipes[READ]){
+          close(pipes[READ]);
+        }
+        if(pipes[WRITE]){
+          close(pipes[WRITE]);
+        }
           /*
           else{
             printf("Successfully closed toRead\n");
           }
           */
-        }
+
 
 
       multi -= 1;
