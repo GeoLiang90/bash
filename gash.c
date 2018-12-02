@@ -15,7 +15,6 @@ char ** parse_args(char *line){
   while (line) {
     temp = strsep(&line, " ");
     //printf("%s", temp);
-    char ch = temp[0];
     /*
     if(strstr(" ", temp)){
       printf("Space found");
@@ -25,12 +24,13 @@ char ** parse_args(char *line){
     //printf("%s+%s \n", temp, "x");
     //char ch = temp[0];
     //while()
-    if(temp && (strcmp(temp,"\0") != 0))
+    if(strcmp(temp,"\0") != 0){
       arr[i] = temp;
     i++;
-  }
+      }
+    }
   return arr;
-}
+  }
 
 void cd(char * dir){
   //printf("%s \n", dir);
@@ -106,17 +106,19 @@ void start(){
       else{
         //Check for a redirect
 
-        char * holder;
+        char ** file;
         char * r_in = strstr(input,">");
         if(r_in){
-
+          char * holder;
+          char ** file;
           //I want the first occurence to be executed
           holder = strsep(&input, ">");
           //printf("%s\n",holder);
           line = parse_args(holder);
-
+          file = parse_args(input);
           //printf("%s\n", input);
-          toWrite = open(input, O_CREAT | O_WRONLY, 0666);
+          //printf("%s\n",file[0]);
+          toWrite = open(file[0], O_CREAT | O_WRONLY, 0666);
         //  lseek(toWrite,0,SEEK_SET);
           //dup2(toWrite,STDOUT_FILENO);
           //toRead = open("stdout.txt",O_RDONLY);
@@ -157,7 +159,9 @@ void start(){
           dup2(toWrite,STDOUT_FILENO);
         }
         execvp(line[0], line);
-        close(toWrite);
+        if (toWrite){
+          close(toWrite);
+        }
         /*
         if(toWrite){
           printf("Works");
@@ -173,7 +177,9 @@ void start(){
           }
           */
         }
-        close(toWrite);
+        if (toWrite){
+          close(toWrite);
+        }
       multi -= 1;
     } //multi while loop ends here
   }
