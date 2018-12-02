@@ -22,8 +22,16 @@ Files & Function Headers:
       Inputs:
       Returns:
 
-    void redirect()
-      Inputs:
+    void redirect_output(char ** in, char *** ln, int * fd)
+      Inputs: input line, container for parsed input, file descriptor to write to
+      Returns:
+
+    void redirect_input(char **in, char *** ln, int * fd)
+      Inputs: input line, container for parsed input, file descriptor to read from
+      Returns:
+      
+    void redirect_compound(char **in, char ***ln, int * fdW, int * fdR)
+      Inputs: input line, container for parsed input, file descriptor to write to, file descriptor to read from
       Returns:
 
     void start()

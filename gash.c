@@ -75,7 +75,7 @@ void redirect_input(char **in, char *** ln, int * fd){
 
 }
 
-int redirect_compound(char **in, char ***ln, int * fdW, int * fdR){
+void redirect_compound(char **in, char ***ln, int * fdW, int * fdR){
   //Compound assumes that you want to run command < file then put that into a file
 
   char * holder;
@@ -238,7 +238,7 @@ void start(){
           }
           */
         }
-    
+
         if(toWrite){
           int clW;
           clW = close(toWrite);
