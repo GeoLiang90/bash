@@ -1,9 +1,10 @@
-gash
+#gash
 by Angela Li and George Liang
 
-How to run our shell:
+#How to run our shell:
   * Please execute $ make, then execute $ make gash
-Features:
+
+##Features:
   * Forks and executes commands
   * Reads and separates multiple commands on one line
   * Ignores any unnecessary white space when running commands
@@ -12,14 +13,14 @@ Features:
   * Restricted ordered redirection first < then >
 
 
-Attempted:
+##Attempted:
 
 
-Bugs:
+##Bugs:
   * Cannot execute redirections that involve multiple > or < unless its restrictive order < and > only
   * Exit occasionally does not work
 
-Files & Function Headers:
+##Files & Function Headers:
   gash.c
     char ** parse_args()
       Inputs: char * line
