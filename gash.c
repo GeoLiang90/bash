@@ -122,8 +122,9 @@ void piper(char **in, char *** ln, char*** commandTwo, int ** pipeArray){
   *commandTwo = parse_args(*in);
   //printf("Second Command: %s\n ",*commandTwo[0]);
 
- pipe(*pipeArray);
+  pipe(*pipeArray);
 }
+
 void start(){
   while(1){
     //NOTE: This puts the working directory into w_dir
@@ -157,14 +158,6 @@ void start(){
       }
     }
 
-    // if(strstr(input,">")){ //|| strstr(input,"<")){
-    //   char * temp;
-    //   char * og = strsep(&input,">");
-    //   temp = strsep(&input,">");
-    //   printf("%s \n", temp);
-    //   redirect(temp);
-    //   input = og;
-    // }
     //x keeps track of index
     int x = 0;
     while(multi){
@@ -193,11 +186,9 @@ void start(){
         else if(r_out){
           redirect_output(&arr[x],&line,&toWrite);
         }
-
         else if(r_in){
           redirect_input(&arr[x],&line,&toRead);
         }
-
         else{
           line = parse_args(arr[x]);
         }
@@ -243,10 +234,8 @@ void start(){
 
        }
 
-       if (strcmp(line[0],"exit")
-        == 0){
+       if (strcmp(line[0],"exit") == 0){
   	     exit(0);
-
       }
 
       int next = fork();
@@ -255,13 +244,10 @@ void start(){
       //Status just allows me to give wait an argument
       wait(&status);
 
-
       if(!next){
-
         if(toWrite){
           dup2(toWrite,STDOUT_FILENO);
         }
-
         if (toRead){
           dup2(toRead,STDIN_FILENO);
         }
@@ -280,23 +266,29 @@ void start(){
         */
         if (p_ipe){
           int c1 = fork();
+          int c2 = fork();
           if (!c1){
-          dup2(pipes[WRITE],STDOUT_FILENO);
-          execvp(line[0],line);
+            dup2(pipes[WRITE],STDOUT_FILENO);
+            //dup2(pipes[READ],STDIN_FILENO);
+            execvp(line[0],line);
+            //close(pipes[WRITE]);
+            //execvp(cmdTwo[0], cmdTwo);
           }
+
+            dup2(pipes[READ],STDIN_FILENO);
+            execvp(cmdTwo[0], cmdTwo);
+          
+
           //dup2(pipes[WRITE],STDIN_FILENO);
         }
         else{
-        execvp(line[0], line);
+          execvp(line[0], line);
         }
+
         if (p_ipe){
-          /*
-          char ** f = calloc(sizeof(char*),1);
-          f[0] = "/bin/stdout";
-          */
-          execvp(cmdTwo[0], f);
+
+          //execvp(cmdTwo[0], cmdTwo);
         }
-        //}
 
         /*
         if(toWrite){
@@ -312,7 +304,7 @@ void start(){
             write(toWrite,out,sizeof(out));
           }
           */
-        }
+
 
         if(toWrite){
           int clW;
@@ -348,9 +340,7 @@ void start(){
             printf("Successfully closed toRead\n");
           }
           */
-
-
-
+        }
       multi -= 1;
     } //multi while loop ends here
   }

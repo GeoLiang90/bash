@@ -22,14 +22,14 @@ by Angela Li and George Liang
 
 ## Files & Function Headers:
   gash.c
-  
+
     char ** parse_args()
       Inputs: char * line
       Returns: Array of strings where each entry is a token
 
     void cd()
-      Inputs:
-      Returns:
+      Inputs: char * dir
+      Returns: void
 
     void redirect_output(char ** in, char *** ln, int * fd)
       Inputs: input line, container for parsed input, file descriptor to write to
