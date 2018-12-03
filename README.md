@@ -14,11 +14,12 @@ by Angela Li and George Liang
 
 
 ## Attempted:
-
+  * Tried to implement piping
 
 ## Bugs:
   * Cannot execute redirections that involve multiple > or < unless its restrictive order < and > only
   * Exit occasionally does not work
+  * No command after semicolon seg faults
 
 ## Files & Function Headers:
   gash.c
