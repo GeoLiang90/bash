@@ -274,10 +274,14 @@ void start(){
             //close(pipes[WRITE]);
             //execvp(cmdTwo[0], cmdTwo);
           }
-
+            //char * test = malloc(200);
+            //read(pipes[READ],test,200);
+            //printf("%s\n", test);
             dup2(pipes[READ],STDIN_FILENO);
+            //printf("%s\n", cmdTwo[0]);
             execvp(cmdTwo[0], cmdTwo);
-          
+            //close(STDOUT_FILENO);
+
 
           //dup2(pipes[WRITE],STDIN_FILENO);
         }
