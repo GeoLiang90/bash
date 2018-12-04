@@ -14,12 +14,13 @@ by Angela Li and George Liang
 
 
 ## Attempted:
-  * Tried to implement piping
+  * Tried to implement piping, but wc in the test commands file keeps reading without termination.
 
 ## Bugs:
   * Cannot execute redirections that involve multiple > or < unless its restrictive order < and > only
   * Exit occasionally does not work
   * No command after semicolon seg faults
+  * Cannot pipe. Second command does not receive EOF. However, the pipe created certainly holds STDOUT of the first command.
 
 ## Files & Function Headers:
   gash.c
